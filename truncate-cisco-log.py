@@ -4,19 +4,30 @@ import sys,os,datetime
 from LogLine import LogLine
 
 def recur(pos):
-  line = source.readline().strip()
-  logline = LogLine(line)
-  while not logline.ok:
-    line = source.readline().strip()
+  found = False
+  for line in source:
+    print "+++"
+    line = line.strip()
     logline = LogLine(line)
+    if logline.ok: 
+      found = True
+      break
+      
+  if not found:
+    print "cannot find"
+    print source.readline()
+    return
+  
   if logline.datetime.date() > target_date:
     print line
-    pos=pos/2
-    source.seek(-pos, 1)
+    pos=(-1)*pos/2
+    print pos
+    source.seek(pos, 1)
     recur(pos)
   elif logline.datetime.date() < target_date:
     print line
     pos=pos/2
+    print pos
     source.seek(pos, 1)
     recur(pos)
   else:

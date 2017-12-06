@@ -3,36 +3,31 @@
 import sys,os,datetime
 from LogLine import LogLine
 
-def read_until_ok():
+def read_until_logline(fh):
   while True:
     line_pos = fh.tell()
     line = fh.readline()
     if not line:
-      #print "eof"
-      return -1
+      # EOF
+      return (-1, Null)
     logline = LogLine(line)
     if logline.ok:
-      break
+      return (line_pos, logline)
 
 
 def find_date(fh, offset):
-  while True:
-    line_pos = fh.tell()
-    line = fh.readline()
-    if not line:
-      #print "eof"
-      return -1
-    logline = LogLine(line)
-    if logline.ok:
-      break
-  #print line.strip()
+  line_pos, logline = read_until_logline(fh)
+  if line_pos<0:
+    # No logline found
+    return line_pos
+    
   if logline.datetime.date() == target_date:
-    #print "Search completed"
+    # Search completed
     return line_pos
   else:
     new_offset = offset/2
     if new_offset == 0:
-      #print "not found"
+      # not found
       return -1
     new_offset = -new_offset if logline.datetime.date() > target_date else new_offset
     fh.seek(new_offset, 1)
@@ -68,5 +63,47 @@ with open(log_filename, "rb") as source:
   if date_pos<0:
     print "not found"
     sys.exit()
-  source.seek(date_pos, 0)
+
+  i = 1
+  found = False
+  while True:
+    offset = date_pos-1024*i
+    if offset<0:
+      offset = 0
+    source.seek(offset, 0)
+
+    line_pos, logline = read_until_logline(source)
+    if line_pos<0:
+      print "strange situation"
+      sys.exit()
+
+    print "reading back..."
+    print str(logline.datetime)
+
+    if logline.datetime.date()<target_date:
+      found = True
+      print "found prev date..."
+      break
+    
+    if offset == 0:
+      print "begin reached..."
+      break
+      
+    i+=1
   
+  if not found:
+    print "prev date not found..."
+    print str(logline.datetime)  
+  else:
+    while True:
+      line_pos, logline = read_until_logline(source)        
+      if line_pos<0:
+        print "strange situation"
+        sys.exit()
+      if logline.datetime.date()==target_date:
+        print "found..."
+        print str(logline.datetime)
+        break
+      
+      
+      

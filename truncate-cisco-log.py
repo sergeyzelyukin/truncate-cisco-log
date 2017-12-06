@@ -3,25 +3,40 @@
 import sys,os,datetime
 from LogLine import LogLine
 
-def recur(pos):
-  line = source.readline().strip()
-  logline = LogLine(line)
-  while not logline.ok:
-    line = source.readline().strip()
+def read_until_ok():
+  while True:
+    line_pos = fh.tell()
+    line = fh.readline()
+    if not line:
+      #print "eof"
+      return -1
     logline = LogLine(line)
-  if logline.datetime.date() > target_date:
-    print line
-    pos=pos/2
-    source.seek(-pos, 1)
-    recur(pos)
-  elif logline.datetime.date() < target_date:
-    print line
-    pos=pos/2
-    source.seek(pos, 1)
-    recur(pos)
+    if logline.ok:
+      break
+
+
+def find_date(fh, offset):
+  while True:
+    line_pos = fh.tell()
+    line = fh.readline()
+    if not line:
+      #print "eof"
+      return -1
+    logline = LogLine(line)
+    if logline.ok:
+      break
+  #print line.strip()
+  if logline.datetime.date() == target_date:
+    #print "Search completed"
+    return line_pos
   else:
-    print line
-    print "Search completed"
+    new_offset = offset/2
+    if new_offset == 0:
+      #print "not found"
+      return -1
+    new_offset = -new_offset if logline.datetime.date() > target_date else new_offset
+    fh.seek(new_offset, 1)
+    return find_date(fh, abs(new_offset))
 
 
 if not len(sys.argv)==4:
@@ -42,8 +57,16 @@ except:
 
 source_filesize = os.path.getsize(log_filename)
 
-with open(log_filename, "rb") as source:
-  pos = source_filesize/2
-  source.seek(pos, 1)
-  recur(pos)
+if source_filesize == 0:
+  print "empty file"
+  sys.exit()
 
+with open(log_filename, "rb") as source:
+  start_pos = source_filesize/2
+  source.seek(start_pos, 1)
+  date_pos = find_date(source, start_pos)
+  if date_pos<0:
+    print "not found"
+    sys.exit()
+  source.seek(date_pos, 0)
+  

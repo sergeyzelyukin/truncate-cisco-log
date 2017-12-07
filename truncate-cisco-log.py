@@ -64,10 +64,10 @@ with open(log_filename, "rb") as source:
     print "not found"
     sys.exit()
 
-  i = 1
+  o = 1024
   found = False
   while True:
-    offset = date_pos-1024*i
+    offset = date_pos-o
     if offset<0:
       offset = 0
     source.seek(offset, 0)
@@ -89,7 +89,8 @@ with open(log_filename, "rb") as source:
       print "begin reached..."
       break
       
-    i+=1
+    o += o*2 if o<256000 else o
+    print o
   
   if not found:
     print "prev date not found..."

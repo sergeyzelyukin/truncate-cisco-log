@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python 
 
 import sys,os,datetime
 from LogLine import LogLine
@@ -39,7 +39,7 @@ class LogFile(file):
       if not line:
         # EOF
         return False
-      logline = LogLine(line)
+      logline = LogLine(line, self._date.year)
       if logline.ok:
         # line is ok, save it
         self._line_pos = line_pos

@@ -21,7 +21,7 @@ def main():
     sys.exit(1)
     
   try:
-    target_date = datetime.datetime.strptime('{0} {1} 2017'.format(sys.argv.pop(1), sys.argv.pop(1)), "%m %d %Y").date()
+    target_date = datetime.datetime.strptime('{0} {1} {2}'.format(sys.argv.pop(1), sys.argv.pop(1), datetime.datetime.now().year), "%m %d %Y").date()
   except:
     print "wrong date"
     sys.exit(1)

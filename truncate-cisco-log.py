@@ -1,7 +1,14 @@
 #!/usr/bin/python
 
-import sys,os,datetime
+import sys,os,datetime,time
 from LogFile import LogFile
+
+def copy_logfile_till_end(source, dest_filename):
+  return
+  with open(dest_filename, "w") as dest:
+    for line in source:
+      dest.write(line)
+
 
 # Get params
 if not len(sys.argv)==4:
@@ -27,21 +34,38 @@ if source_filesize == 0:
   sys.exit(1)
 
 # Searching
+start = time.time()
 with LogFile(log_filename) as lf:
   lf.date = target_date
   if not lf.fast_rewind():
-    print "date does not exist in file"
+    stop = time.time()
+    print "date does not exist in file (time spent: %.1f)"%(stop-start)
     sys.exit(1)
 
   if not lf.back_rewind():
     # last read date is the lowest
-    print str(lf.logline.datetime)  
+    stop = time.time()
+    print "found: %s, time spent: %.1f"%(str(lf.logline.datetime), stop-start)
+
+    start = time.time()
+    trunc_filename = log_filename+".trunc"
+    copy_logfile_till_end(lf, trunc_filename)
+    stop = time.time()
+    print "wrote: %s, time spent: %.1f"%(trunc_filename, stop-start)
 
   if lf.forward_rewind():
     # found first occurence of date
-    print str(lf.logline.datetime)
+    stop = time.time()
+    print "found: %s, time spent: %.1f"%(str(lf.logline.datetime), stop-start)
+
+    start = time.time()
+    trunc_filename = log_filename+".trunc"
+    copy_logfile_till_end(lf, trunc_filename)
+    stop = time.time()
+    print "wrote: %s, time spent: %.1f"%(trunc_filename, stop-start)
   else:
     # impossible
-    raise Exception("cannot return to date")
+    stop = time.time()
+    raise Exception("cannot return to date (time spent: %.1f)"%(stop-start))
       
       

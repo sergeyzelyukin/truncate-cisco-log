@@ -26,7 +26,11 @@ class LogFile(file):
     # Start from the middle
     start_pos = self._filesize/2
     self.seek(start_pos, 0)    
-    return self.recursive_jumps_to_date(start_pos)
+    result = self.recursive_jumps_to_date(start_pos)
+    
+    if result:
+      self.seek(self._line_pos, 0)
+    return result
 
   def read_until_logline(self):
     while True:
@@ -99,6 +103,7 @@ class LogFile(file):
         raise Exception("unable to find line, even previously found")
       if self._logline.datetime.date()==self._date:
         # found
+        self.seek(self._line_pos, 0)
         return True
     
   @property
@@ -108,6 +113,10 @@ class LogFile(file):
   @property
   def logline(self):
     return self._logline
+
+  @property
+  def line_pos(self):
+    return self._line_pos
     
   @property
   def date(self):

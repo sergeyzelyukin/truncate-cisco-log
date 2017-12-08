@@ -63,5 +63,3 @@ with LogFile(log_filename) as lf:
   stop = time.time()
   print "wrote: %s, time spent: %.1f"%(trunc_filename, stop-start)
 
-      
-      

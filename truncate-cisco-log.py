@@ -42,30 +42,26 @@ with LogFile(log_filename) as lf:
     print "date does not exist in file (time spent: %.1f)"%(stop-start)
     sys.exit(1)
 
-  if not lf.back_rewind():
-    # last read date is the lowest
-    stop = time.time()
-    print "found: %s, time spent: %.1f"%(str(lf.logline.datetime), stop-start)
-
-    start = time.time()
-    trunc_filename = log_filename+".trunc"
-    copy_logfile_till_end(lf, trunc_filename)
-    stop = time.time()
-    print "wrote: %s, time spent: %.1f"%(trunc_filename, stop-start)
-
-  if lf.forward_rewind():
-    # found first occurence of date
-    stop = time.time()
-    print "found: %s, time spent: %.1f"%(str(lf.logline.datetime), stop-start)
-
-    start = time.time()
-    trunc_filename = log_filename+".trunc"
-    copy_logfile_till_end(lf, trunc_filename)
-    stop = time.time()
-    print "wrote: %s, time spent: %.1f"%(trunc_filename, stop-start)
+  if lf.back_rewind():
+    if lf.forward_rewind():
+      # found first occurence of date
+      pass
+    else:
+      # impossible
+      stop = time.time()
+      raise Exception("cannot return to date (time spent: %.1f)"%(stop-start))
   else:
-    # impossible
-    stop = time.time()
-    raise Exception("cannot return to date (time spent: %.1f)"%(stop-start))
+    # last read date is the lowest
+    pass
+    
+  stop = time.time()
+  print "found: %s, time spent: %.1f"%(str(lf.logline.datetime), stop-start)
+
+  start = time.time()
+  trunc_filename = log_filename+".trunc"
+  copy_logfile_till_end(lf, trunc_filename)
+  stop = time.time()
+  print "wrote: %s, time spent: %.1f"%(trunc_filename, stop-start)
+
       
       

@@ -63,6 +63,8 @@ def main():
     print "wrote: %s, time spent: %.1f"%(trunc_filename, stop-start)
 
 
-
 if __name__ == '__main__':
-    main()
+  if not sys.version_info[0]==2:
+    sys.exit("python version is not supported")
+  
+  main()
